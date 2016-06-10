@@ -152,8 +152,8 @@ def test_uavcan():
             yield
             aborter.remove()
 
-        # Dynamic node ID allocation
         try:
+            # Dynamic node ID allocation
             nsmon = uavcan.app.node_monitor.NodeMonitor(n)
             alloc = uavcan.app.dynamic_node_id.CentralizedServer(n, nsmon)
 
@@ -170,24 +170,6 @@ def test_uavcan():
             info('Node %r initialized', node_id)
             for nd in target_nodes:
                 logger.info('Discovered node %r', nd)
-
-            def request(what, fire_and_forget=False):
-                response_event = None
-
-                def cb(e):
-                    nonlocal response_event
-                    if not e:
-                        abort('Request has timed out: %r', what)
-                    response_event = e
-
-                if fire_and_forget:
-                    n.request(what, node_id, lambda _: None)
-                    safe_spin(0.1)
-                else:
-                    n.request(what, node_id, cb)
-                    while response_event is None:
-                        safe_spin(0.1)
-                    return response_event.response
 
             # Starting the node and checking its self-reported diag outputs
             def wait_for_init():
