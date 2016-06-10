@@ -108,7 +108,7 @@ def wait_for_boot():
 
                         if 'error' in line.lower() or 'fail' in line.lower():
                             failure_notification_received = True
-                            warning('Boot error: %r', line)
+                            error('Boot error: %r', line)
                     else:
                         if failure_notification_received:
                             abort('Device failed to start up normally; see the log for details')
@@ -121,13 +121,12 @@ def wait_for_boot():
             finally:
                 p.flushInput()
 
-    warning("The board did not report to CLI with a correct boot message, but we're going "
-            "to continue anyway. Possible reasons for this warning:\n"
-            '1. The board could not boot properly (however it was flashed successfully).\n'
-            '2. The debug connector is not soldered properly.\n'
-            '3. The serial port is open by another application.\n'
-            '4. Either USB-UART adapter or VM are malfunctioning. Try to re-connect the '
-            'adapter (disconnect from USB and from the board!) or reboot the VM.')
+    abort("The board did not report to CLI with a correct boot message. Possible reasons for this error:\n"
+          '1. The board could not boot properly (however it was flashed successfully).\n'
+          '2. The debug connector is not soldered properly.\n'
+          '3. The serial port is open by another application.\n'
+          '4. Either USB-UART adapter or VM are malfunctioning. Try to re-connect the '
+          'adapter (disconnect from USB and from the board!) or reboot the VM.')
 
 
 def test_uavcan():
