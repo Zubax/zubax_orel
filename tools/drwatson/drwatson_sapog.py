@@ -278,9 +278,24 @@ def test_uavcan():
                 logger.info('CAN2 test failed', exc_info=True)
                 abort('CAN2 test failed [%r]', ex)
 
+            # Testing LED
+            info('Testing LED')
+
+            def set_led():
+                rgb = uavcan.equipment.indication.RGB565(red=0b11111, green=0b111111, blue=0b11111)
+                slc = uavcan.equipment.indication.SingleLightCommand(light_id=0, color=rgb)
+                n.broadcast(uavcan.equipment.indication.LightsCommand(commands=[slc]))
+                check_everything()
+
+            publisher = n.periodic(0.1, set_led)
+            with BackgroundSpinner(safe_spin, 0.1):
+                if not input('Is the LED glowing bright white?', yes_no=True, default_answer=True):
+                    abort('LED is not working properly')
+            publisher.remove()
+
         except Exception:
             for nid in nsmon.get_all_node_id():
-                logger.error('UAVCAN test failed; last known state of the device node: %r' % nsmon.get(nid))
+                logger.info('UAVCAN test failed; last known state of the device node: %r' % nsmon.get(nid))
             raise
 
 
