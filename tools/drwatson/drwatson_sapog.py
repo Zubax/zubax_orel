@@ -22,8 +22,8 @@ sys.path.insert(1, os.path.join(sys.path[0], 'pyuavcan'))
 
 from drwatson import init, run, make_api_context_with_user_provided_credentials, execute_shell_command,\
     info, error, input, CLIWaitCursor, download, abort, glob_one, download_newest, open_serial_port,\
-    enforce, SerialCLI, catch, BackgroundSpinner, fatal, warning, BackgroundDelay, imperative, \
-    load_firmware_via_gdb, convert_units_from_to
+    enforce, SerialCLI, BackgroundSpinner, fatal, warning, BackgroundDelay, imperative, \
+    load_firmware_via_gdb, convert_units_from_to, BackgroundCLIListener
 import logging
 import time
 import yaml
@@ -51,6 +51,7 @@ STABILITY_TEST_DUTY_CYCLES = [0.3, 0.6]
 
 
 logger = logging.getLogger('main')
+cli_logger = logging.getLogger('cli')
 
 
 args = init('''Production testing application for ESC based on PX4 Sapog open source firmware.
@@ -99,7 +100,7 @@ def wait_for_boot():
                     timed_out, line = serial_cli.read_line(END_OF_BOOT_LOG_TIMEOUT)
 
                     if not timed_out:
-                        logger.info('CLI output: %r', line)
+                        cli_logger.info(repr(line))
 
                         if PRODUCT_NAME in line:
                             info('Boot confirmed')
@@ -400,11 +401,11 @@ def process_one_device():
     input('Connect a motor WITHOUT ANY LOAD ATTACHED to the ESC, then press ENTER.\n'
           'CAUTION: THE MOTOR WILL SPIN')
 
-    info('Testing UAVCAN interface...')
-    test_uavcan()
-
-    info('Connecting via CLI...')
     with open_serial_port(DEBUGGER_PORT_CLI_GLOB) as io:
+        info('Testing UAVCAN interface...')
+        with BackgroundCLIListener(io, lambda line: cli_logger.info(repr(line))):
+            test_uavcan()
+
         cli = SerialCLI(io, 0.1)
         cli.flush_input(0.5)
 
