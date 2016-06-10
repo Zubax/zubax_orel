@@ -245,6 +245,20 @@ def test_uavcan():
 
             # Final results
             imperative('Validate the latest ESC status variables (units are SI):\n%s', uavcan.to_yaml(latest_status))
+
+            # Testing CAN2
+            with BackgroundSpinner(safe_spin, 0.1):
+                input('1. Disconnect CAN1 and connect to CAN2\n'
+                      '2. Terminate CAN2\n'
+                      '3. Press ENTER')
+
+            safe_spin(1)
+            try:
+                check_status()
+            except Exception as ex:
+                logger.info('CAN2 test failed', exc_info=True)
+                abort('CAN2 test failed [%r]', ex)
+
         except Exception:
             for nid in nsmon.get_all_node_id():
                 logger.error('UAVCAN test failed; last known state of the device node: %r' % nsmon.get(nid))
