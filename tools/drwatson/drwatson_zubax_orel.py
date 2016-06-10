@@ -38,7 +38,8 @@ FLASH_OFFSET = 0x08000000
 TOOLCHAIN_PREFIX = 'arm-none-eabi-'
 DEBUGGER_PORT_GDB_GLOB = '/dev/serial/by-id/*Black_Magic_Probe*-if00'
 DEBUGGER_PORT_CLI_GLOB = '/dev/serial/by-id/*Black_Magic_Probe*-if02'
-BOOT_TIMEOUT = 9
+BOOT_TIMEOUT = 10
+END_OF_BOOT_LOG_TIMEOUT = 3
 
 
 logger = logging.getLogger('main')
@@ -71,8 +72,6 @@ Usage instructions:
 
 
 def wait_for_boot():
-    deadline = time.monotonic() + BOOT_TIMEOUT
-
     def handle_serial_port_hanging():
         fatal('DRWATSON HAS DETECTED A PROBLEM WITH CONNECTED HARDWARE AND NEEDS TO TERMINATE.\n'
               'A serial port operation has timed out. This usually indicates a problem with the connected '
@@ -81,14 +80,33 @@ def wait_for_boot():
               use_abort=True)
 
     with BackgroundDelay(BOOT_TIMEOUT * 5, handle_serial_port_hanging):
-        with open_serial_port(DEBUGGER_PORT_CLI_GLOB, timeout=BOOT_TIMEOUT) as p:
+        with open_serial_port(DEBUGGER_PORT_CLI_GLOB) as p:
             try:
-                for line in p:
-                    if PRODUCT_NAME.encode() in line:
-                        return
-                    logger.info('CLI output: %s', line)
-                    if time.monotonic() > deadline:
-                        break
+                serial_cli = SerialCLI(p)
+                boot_deadline = time.monotonic() + BOOT_TIMEOUT
+                boot_notification_received = False
+                failure_notification_received = False
+
+                while boot_deadline > time.monotonic():
+                    timed_out, line = serial_cli.read_line(END_OF_BOOT_LOG_TIMEOUT)
+
+                    if not timed_out:
+                        logger.info('CLI output: %r', line)
+
+                        if PRODUCT_NAME in line:
+                            info('Boot confirmed')
+                            boot_notification_received = True
+
+                        if 'error' in line.lower() or 'fail' in line.lower():
+                            failure_notification_received = True
+                            warning('Boot error: %r', line)
+                    else:
+                        if failure_notification_received:
+                            abort('Device failed to start up normally; see the log for details')
+
+                        if boot_notification_received:
+                            return
+
             except IOError:
                 logging.info('Boot error', exc_info=True)
             finally:
@@ -101,6 +119,18 @@ def wait_for_boot():
             '3. The serial port is open by another application.\n'
             '4. Either USB-UART adapter or VM are malfunctioning. Try to re-connect the '
             'adapter (disconnect from USB and from the board!) or reboot the VM.')
+
+
+def read_zubax_id(cli):
+    zubax_id_lines = cli.write_line_and_read_output_lines_until_timeout('zubax_id')
+    zubax_id_lines_joined = '\n'.join(zubax_id_lines)
+    try:
+        zubax_id = yaml.load(zubax_id_lines_joined)
+    except Exception:
+        logger.info('Could not parse YAML: %r', zubax_id_lines_joined)
+        raise
+    logger.info('Zubax ID: %r', zubax_id)
+    return zubax_id
 
 
 def init_can_iface():
@@ -179,10 +209,12 @@ with CLIWaitCursor():
 
 
 def process_one_device():
-    out = input('1. Connect DroneCode Probe to the debug connector\n'
-                '2. Connect CAN to the first CAN1 connector on the device; terminate the other CAN1 connector\n'
-                '3. If you want to skip firmware upload, type F\n'
-                '4. Press ENTER')
+    out = input('1. Connect DroneCode Probe to the debug connector.\n'
+                '2. Connect CAN to the first CAN1 connector on the device; terminate the other CAN1 connector.\n'
+                '4. Connect an appropriate power supply (see the hardware specs for requirements).\n'
+                '   Make sure the motor leads are not connected to anything.\n'
+                '5. If you want to skip firmware upload, type F.\n'
+                '6. Press ENTER.')
 
     skip_fw_upload = 'f' in out.lower()
     if not skip_fw_upload:
@@ -193,10 +225,13 @@ def process_one_device():
                                   load_offset=FLASH_OFFSET,
                                   gdb_port=glob_one(DEBUGGER_PORT_GDB_GLOB),
                                   gdb_monitor_scan_command='swdp_scan')
-        info('Waiting for the board to boot...')
-        wait_for_boot()
     else:
-        info('Firmware upload skipped')
+        info('Firmware upload skipped, rebooting the board')
+        with open_serial_port(DEBUGGER_PORT_CLI_GLOB) as io:
+            SerialCLI(io, 0.1).write_line_and_read_output_lines_until_timeout('reboot')
+
+    info('Waiting for the board to boot...')
+    wait_for_boot()
 
     info('Testing UAVCAN interface...')
     #test_uavcan()
@@ -212,11 +247,7 @@ def process_one_device():
         except Exception:
             pass
 
-        zubax_id = cli.write_line_and_read_output_lines_until_timeout('zubax_id')
-        zubax_id = yaml.load('\n'.join(zubax_id))
-        logger.info('Zubax ID: %r', zubax_id)
-
-        unique_id = b64decode(zubax_id['hw_unique_id'])
+        unique_id = b64decode(read_zubax_id(cli)['hw_unique_id'])
 
         # Getting the signature
         info('Requesting signature for unique ID %s', binascii.hexlify(unique_id).decode())
@@ -233,12 +264,9 @@ def process_one_device():
         logger.debug('Signature installation response (may fail, which is OK): %r', out)
 
         # Reading the signature back and verifying it
-        zubax_id = cli.write_line_and_read_output_lines_until_timeout('zubax_id')
-        zubax_id = yaml.load('\n'.join(zubax_id))
-        out = zubax_id['hw_signature']
-        enforce(len(out) == 1, 'Could not read the signature back. Returned lines: %r', out)
-        logger.info('Installed signature in Base64: %s', out[0])
-        enforce(b64decode(out[0]) == gensign_response.signature,
+        installed_signature = read_zubax_id(cli)['hw_signature']
+        logger.info('Installed signature in Base64: %s', installed_signature)
+        enforce(b64decode(installed_signature) == gensign_response.signature,
                 'Written signature does not match the generated signature')
 
         info('Signature has been installed and verified')
