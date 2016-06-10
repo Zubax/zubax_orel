@@ -23,12 +23,15 @@ sys.path.insert(1, os.path.join(sys.path[0], 'pyuavcan'))
 from drwatson import init, run, make_api_context_with_user_provided_credentials, execute_shell_command,\
     info, error, input, CLIWaitCursor, download, abort, glob_one, download_newest, open_serial_port,\
     enforce, SerialCLI, catch, BackgroundSpinner, fatal, warning, BackgroundDelay, imperative, \
-    load_firmware_via_gdb
+    load_firmware_via_gdb, convert_units_from_to
 import logging
 import time
 import yaml
 import binascii
+import uavcan
 from base64 import b64decode, b64encode
+from contextlib import closing, contextmanager
+from functools import partial
 
 
 PRODUCT_NAME = 'io.px4.sapog'
@@ -40,6 +43,9 @@ DEBUGGER_PORT_GDB_GLOB = '/dev/serial/by-id/*Black_Magic_Probe*-if00'
 DEBUGGER_PORT_CLI_GLOB = '/dev/serial/by-id/*Black_Magic_Probe*-if02'
 BOOT_TIMEOUT = 10
 END_OF_BOOT_LOG_TIMEOUT = 3
+
+TEMPERATURE_RANGE_DEGC = 10, 40
+ESC_ERROR_LIMIT = 1000
 
 
 logger = logging.getLogger('main')
@@ -119,6 +125,128 @@ def wait_for_boot():
             '3. The serial port is open by another application.\n'
             '4. Either USB-UART adapter or VM are malfunctioning. Try to re-connect the '
             'adapter (disconnect from USB and from the board!) or reboot the VM.')
+
+
+def test_uavcan():
+    node_info = uavcan.protocol.GetNodeInfo.Response()
+    node_info.name = 'com.zubax.drwatson.sapog'
+
+    iface = init_can_iface()
+
+    with closing(uavcan.make_node(iface,
+                                  bitrate=CAN_BITRATE,
+                                  node_id=127,
+                                  mode=uavcan.protocol.NodeStatus().MODE_OPERATIONAL,
+                                  node_info=node_info)) as n:
+        def safe_spin(timeout):
+            try:
+                n.spin(timeout)
+            except uavcan.UAVCANException:
+                logger.error('Node spin failure', exc_info=True)
+
+        @contextmanager
+        def time_limit(timeout, error_fmt, *args):
+            aborter = n.defer(timeout, partial(abort, error_fmt, *args))
+            yield
+            aborter.remove()
+
+        # Dynamic node ID allocation
+        try:
+            nsmon = uavcan.app.node_monitor.NodeMonitor(n)
+            alloc = uavcan.app.dynamic_node_id.CentralizedServer(n, nsmon)
+
+            with time_limit(10, 'The node did not show up in time. Check CAN interface and crystal oscillator.'):
+                while True:
+                    safe_spin(1)
+                    target_nodes = list(nsmon.find_all(lambda e: e.info and e.info.name.decode() == PRODUCT_NAME))
+                    if len(target_nodes) == 1:
+                        break
+                    if len(target_nodes) > 1:
+                        abort('Expected to find exactly one target node, found more: %r', target_nodes)
+
+            node_id = target_nodes[0].node_id
+            info('Node %r initialized', node_id)
+            for nd in target_nodes:
+                logger.info('Discovered node %r', nd)
+
+            def request(what, fire_and_forget=False):
+                response_event = None
+
+                def cb(e):
+                    nonlocal response_event
+                    if not e:
+                        abort('Request has timed out: %r', what)
+                    response_event = e
+
+                if fire_and_forget:
+                    n.request(what, node_id, lambda _: None)
+                    safe_spin(0.1)
+                else:
+                    n.request(what, node_id, cb)
+                    while response_event is None:
+                        safe_spin(0.1)
+                    return response_event.response
+
+            # Starting the node and checking its self-reported diag outputs
+            def wait_for_init():
+                with time_limit(10, 'The node did not complete initialization in time'):
+                    while True:
+                        safe_spin(1)
+                        if nsmon.exists(node_id) and nsmon.get(node_id).status.mode == \
+                                uavcan.protocol.NodeStatus().MODE_OPERATIONAL:
+                            break
+
+            def check_status():
+                status = nsmon.get(node_id).status
+                enforce(status.mode == uavcan.protocol.NodeStatus().MODE_OPERATIONAL,
+                        'Unexpected operating mode')
+                enforce(status.health == uavcan.protocol.NodeStatus().HEALTH_OK,
+                        'Bad node health')
+
+            info('Waiting for the node to complete initialization...')
+            wait_for_init()
+            check_status()
+
+            col_esc_status = uavcan.app.message_collector.MessageCollector(n, uavcan.equipment.esc.Status, timeout=2)
+
+            expect_rotation = False
+
+            def check_everything():
+                check_status()
+
+                try:
+                    m = col_esc_status[node_id].message
+                except KeyError:
+                    abort('Rock is dead.')
+                else:
+                    if expect_rotation:
+                        enforce(m.rpm > 0, 'RPM is zero, should be positive')
+                        enforce(m.power_rating_pct > 0, 'Power rating is zero, should be positive')
+                    else:
+                        enforce(m.rpm == 0, 'RPM should be zero, not %r', m.rpm)
+                        enforce(m.power_rating_pct == 0, 'Power rating should be zero, not %r', m.power_rating_pct)
+
+                    enforce(m.error_count < ESC_ERROR_LIMIT, 'High error count: %r', m.error_count)
+
+                    temp_degc = convert_units_from_to(m.temperature, 'Kelvin', 'Celsius')
+                    enforce(TEMPERATURE_RANGE_DEGC[0] <= temp_degc <= TEMPERATURE_RANGE_DEGC[1],
+                            'Invalid temperature: %r degC', temp_degc)
+
+            # Testing before the motor is started
+            safe_spin(2)
+            check_everything()
+
+            # Starting the motor
+
+            # Stopping the motor
+
+            # Final results
+            imperative('Validate the ESC status variables (units are SI):\n%s',
+                       uavcan.to_yaml(col_esc_status[node_id].message))
+        except Exception:
+            for nid in nsmon.get_all_node_id():
+                print('Node state: %r' % nsmon.get(nid))
+            raise
 
 
 def read_zubax_id(cli):
@@ -233,8 +361,10 @@ def process_one_device():
     info('Waiting for the board to boot...')
     wait_for_boot()
 
+    input('Connect motor to the ESC, then press ENTER')
+
     info('Testing UAVCAN interface...')
-    #test_uavcan()
+    test_uavcan()
 
     info('Connecting via CLI...')
     with open_serial_port(DEBUGGER_PORT_CLI_GLOB) as io:
