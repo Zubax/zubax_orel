@@ -171,6 +171,20 @@ def test_uavcan():
             for nd in target_nodes:
                 logger.info('Discovered node %r', nd)
 
+            def request(what):
+                response_event = None
+
+                def cb(e):
+                    nonlocal response_event
+                    if not e:
+                        abort('Request has timed out: %r', what)
+                    response_event = e
+
+                n.request(what, node_id, cb)
+                while response_event is None:
+                    safe_spin(0.1)
+                return response_event.response
+
             # Starting the node and checking its self-reported diag outputs
             def wait_for_init():
                 with time_limit(10, 'The node did not complete initialization in time'):
@@ -190,6 +204,11 @@ def test_uavcan():
             info('Waiting for the node to complete initialization...')
             wait_for_init()
             check_status()
+
+            info('Resetting the configuration to factory defaults...')
+            enforce(request(uavcan.protocol.param.ExecuteOpcode.Request(
+                                opcode=uavcan.protocol.param.ExecuteOpcode.Request().OPCODE_ERASE)).ok,
+                    'The node refused to reset configuration to factory defaults')
 
             col_esc_status = uavcan.app.message_collector.MessageCollector(n, uavcan.equipment.esc.Status, timeout=2)
 
@@ -244,7 +263,7 @@ def test_uavcan():
             check_everything()
 
             # Final results
-            imperative('Validate the latest ESC status variables (units are SI):\n%s', uavcan.to_yaml(latest_status))
+            info('Validate the latest ESC status variables (units are SI):\n%s', uavcan.to_yaml(latest_status))
 
             # Testing CAN2
             with BackgroundSpinner(safe_spin, 0.1):
