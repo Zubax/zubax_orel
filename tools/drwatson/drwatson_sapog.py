@@ -220,8 +220,8 @@ def test_uavcan():
                     abort('Rock is dead.')
                 else:
                     if check_rotation:
-                        enforce(m.rpm > 0, 'RPM is zero, should be positive')
-                        enforce(m.power_rating_pct > 0, 'Power rating is zero, should be positive')
+                        enforce(m.rpm > 0 and m.power_rating_pct > 0, 'Could not start the motor')
+                        enforce(m.current > 0, 'Current is not positive')
 
                     enforce(m.error_count < ESC_ERROR_LIMIT, 'High error count: %r', m.error_count)
 
@@ -251,6 +251,7 @@ def test_uavcan():
 
             info('Checking stability...')
             for dc in STABILITY_TEST_DUTY_CYCLES:
+                info('Setting duty cycle %d%%...', int(dc * 100))
                 publisher = n.periodic(0.01, partial(do_publish, dc, True))
                 safe_spin(5)
                 publisher.remove()
