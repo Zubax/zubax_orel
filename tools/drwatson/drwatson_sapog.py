@@ -47,7 +47,7 @@ END_OF_BOOT_LOG_TIMEOUT = 3
 TEMPERATURE_RANGE_DEGC = 10, 40
 ESC_ERROR_LIMIT = 1000
 STARTUP_DUTY_CYCLE = 0.001
-STABILITY_TEST_DUTY_CYCLE = 0.6
+STABILITY_TEST_DUTY_CYCLES = [0.3, 0.6]
 
 
 logger = logging.getLogger('main')
@@ -250,9 +250,10 @@ def test_uavcan():
             publisher.remove()
 
             info('Checking stability...')
-            publisher = n.periodic(0.01, partial(do_publish, STABILITY_TEST_DUTY_CYCLE, True))
-            safe_spin(10)
-            publisher.remove()
+            for dc in STABILITY_TEST_DUTY_CYCLES:
+                publisher = n.periodic(0.01, partial(do_publish, dc, True))
+                safe_spin(5)
+                publisher.remove()
 
             info('Stopping...')
             latest_status = col_esc_status[node_id].message
