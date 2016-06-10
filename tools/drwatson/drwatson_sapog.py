@@ -46,6 +46,8 @@ END_OF_BOOT_LOG_TIMEOUT = 3
 
 TEMPERATURE_RANGE_DEGC = 10, 40
 ESC_ERROR_LIMIT = 1000
+STARTUP_DUTY_CYCLE = 0.001
+STABILITY_TEST_DUTY_CYCLE = 0.6
 
 
 logger = logging.getLogger('main')
@@ -209,9 +211,7 @@ def test_uavcan():
 
             col_esc_status = uavcan.app.message_collector.MessageCollector(n, uavcan.equipment.esc.Status, timeout=2)
 
-            expect_rotation = False
-
-            def check_everything():
+            def check_everything(check_rotation=False):
                 check_status()
 
                 try:
@@ -219,12 +219,9 @@ def test_uavcan():
                 except KeyError:
                     abort('Rock is dead.')
                 else:
-                    if expect_rotation:
+                    if check_rotation:
                         enforce(m.rpm > 0, 'RPM is zero, should be positive')
                         enforce(m.power_rating_pct > 0, 'Power rating is zero, should be positive')
-                    else:
-                        enforce(m.rpm == 0, 'RPM should be zero, not %r', m.rpm)
-                        enforce(m.power_rating_pct == 0, 'Power rating should be zero, not %r', m.power_rating_pct)
 
                     enforce(m.error_count < ESC_ERROR_LIMIT, 'High error count: %r', m.error_count)
 
@@ -233,16 +230,37 @@ def test_uavcan():
                             'Invalid temperature: %r degC', temp_degc)
 
             # Testing before the motor is started
+            imperative('CAUTION: THE MOTOR WILL START IN 2 SECONDS, KEEP CLEAR')
             safe_spin(2)
             check_everything()
 
             # Starting the motor
+            esc_raw_command_bitlen = \
+                uavcan.get_uavcan_data_type(uavcan.get_fields(uavcan.equipment.esc.RawCommand())['cmd'])\
+                    .value_type.bitlen  # SO EASY TO USE
 
-            # Stopping the motor
+            def do_publish(duty_cycle, check_rotation):
+                command_value = int(duty_cycle * (2 ** (esc_raw_command_bitlen - 1)))
+                n.broadcast(uavcan.equipment.esc.RawCommand(cmd=[command_value]))
+                check_everything(check_rotation)
+
+            info('Starting the motor')
+            publisher = n.periodic(0.01, partial(do_publish, STARTUP_DUTY_CYCLE, False))
+            safe_spin(5)
+            publisher.remove()
+
+            info('Checking stability...')
+            publisher = n.periodic(0.01, partial(do_publish, STABILITY_TEST_DUTY_CYCLE, True))
+            safe_spin(10)
+            publisher.remove()
+
+            info('Stopping...')
+            latest_status = col_esc_status[node_id].message
+            safe_spin(1)
+            check_everything()
 
             # Final results
-            imperative('Validate the ESC status variables (units are SI):\n%s',
-                       uavcan.to_yaml(col_esc_status[node_id].message))
+            imperative('Validate the latest ESC status variables (units are SI):\n%s', uavcan.to_yaml(latest_status))
         except Exception:
             for nid in nsmon.get_all_node_id():
                 print('Node state: %r' % nsmon.get(nid))
@@ -361,7 +379,8 @@ def process_one_device():
     info('Waiting for the board to boot...')
     wait_for_boot()
 
-    input('Connect motor to the ESC, then press ENTER')
+    input('Connect a motor WITHOUT ANY LOAD ATTACHED to the ESC, then press ENTER.\n'
+          'CAUTION: THE MOTOR WILL SPIN')
 
     info('Testing UAVCAN interface...')
     test_uavcan()
