@@ -247,7 +247,7 @@ def test_uavcan():
             imperative('Validate the latest ESC status variables (units are SI):\n%s', uavcan.to_yaml(latest_status))
         except Exception:
             for nid in nsmon.get_all_node_id():
-                print('Node state: %r' % nsmon.get(nid))
+                logger.error('UAVCAN test failed; last known state of the device node: %r' % nsmon.get(nid))
             raise
 
 
