@@ -121,12 +121,12 @@ def wait_for_boot():
             finally:
                 p.flushInput()
 
-    abort("The board did not report to CLI with a correct boot message. Possible reasons for this error:\n"
-          '1. The board could not boot properly (however it was flashed successfully).\n'
+    abort("The device did not report to CLI with a correct boot message. Possible reasons for this error:\n"
+          '1. The device could not boot properly (however it was flashed successfully).\n'
           '2. The debug connector is not soldered properly.\n'
           '3. The serial port is open by another application.\n'
           '4. Either USB-UART adapter or VM are malfunctioning. Try to re-connect the '
-          'adapter (disconnect from USB and from the board!) or reboot the VM.')
+          'adapter (disconnect from USB and from the device!) or reboot the VM.')
 
 
 def test_uavcan():
@@ -157,6 +157,7 @@ def test_uavcan():
             nsmon = uavcan.app.node_monitor.NodeMonitor(n)
             alloc = uavcan.app.dynamic_node_id.CentralizedServer(n, nsmon)
 
+            info('Waiting for the node to show up on the CAN bus...')
             with time_limit(10, 'The node did not show up in time. Check CAN interface and crystal oscillator.'):
                 while True:
                     safe_spin(1)
@@ -372,11 +373,11 @@ with CLIWaitCursor():
     assert 30 < (len(firmware_data) / 1024) <= 240, 'Invalid firmware size'
 
 
-def process_one_device():
+def process_one_device(set_device_info):
     out = input('1. Connect DroneCode Probe to the debug connector.\n'
                 '2. Connect CAN to the first CAN1 connector on the device; terminate the other CAN1 connector.\n'
                 '4. Connect an appropriate power supply (see the hardware specs for requirements).\n'
-                '   Make sure the motor leads are not connected to anything.\n'
+                '   Make sure the motor leads are NOT CONNECTED to anything.\n'
                 '5. If you want to skip firmware upload, type F.\n'
                 '6. Press ENTER.')
 
@@ -390,31 +391,33 @@ def process_one_device():
                                   gdb_port=glob_one(DEBUGGER_PORT_GDB_GLOB),
                                   gdb_monitor_scan_command='swdp_scan')
     else:
-        info('Firmware upload skipped, rebooting the board')
+        info('Firmware upload skipped, rebooting the device')
         with open_serial_port(DEBUGGER_PORT_CLI_GLOB) as io:
             SerialCLI(io, 0.1).write_line_and_read_output_lines_until_timeout('reboot')
 
-    info('Waiting for the board to boot...')
+    info('Waiting for the device to boot...')
     wait_for_boot()
 
-    input('Connect a motor WITHOUT ANY LOAD ATTACHED to the ESC, then press ENTER.\n'
-          'CAUTION: THE MOTOR WILL SPIN')
-
     with open_serial_port(DEBUGGER_PORT_CLI_GLOB) as io:
-        info('Testing UAVCAN interface...')
-        with BackgroundCLIListener(io, lambda line: cli_logger.info(repr(line))):
-            test_uavcan()
-
+        info('Identifying the connected device...')
         cli = SerialCLI(io, 0.1)
         cli.flush_input(0.5)
+
+        zubax_id = read_zubax_id(cli)
+        unique_id = b64decode(zubax_id['hw_unique_id'])
+        product_id = zubax_id['product_id']
+        set_device_info(product_id, unique_id)
+
+        with BackgroundCLIListener(io, lambda line: cli_logger.info(repr(line))):
+            input('Connect a motor WITHOUT ANY LOAD ATTACHED to the ESC, then press ENTER.\n'
+                  'CAUTION: THE MOTOR WILL SPIN')
+            test_uavcan()
 
         try:
             # Using first command to get rid of any garbage lingering in the buffers
             cli.write_line_and_read_output_lines_until_timeout('systime')
         except Exception:
             pass
-
-        unique_id = b64decode(read_zubax_id(cli)['hw_unique_id'])
 
         # Getting the signature
         info('Requesting signature for unique ID %s', binascii.hexlify(unique_id).decode())
@@ -438,4 +441,4 @@ def process_one_device():
 
         info('Signature has been installed and verified')
 
-run(process_one_device)
+run(licensing_api, process_one_device)
