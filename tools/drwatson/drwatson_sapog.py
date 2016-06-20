@@ -321,15 +321,39 @@ def init_can_iface():
     else:
         logger.debug('Using iface %r as SLCAN', args.iface)
 
+        iface_name = 'slcan0'
+        try:
+            execute_shell_command('ifconfig %s up', iface_name)
+        except DrwatsonException:
+            logger.info('%s is not working, reinitializing...', iface_name)
+            pass
+        else:
+            logger.info('%s is already available, using as-is', iface_name)
+            return iface_name
+
+        speed_code = {
+            1000000: 8,
+            500000: 6,
+            250000: 5,
+            125000: 4,
+            100000: 3
+        }[CAN_BITRATE]
+
         # We don't want the SLCAN daemon to interfere...
         execute_shell_command('killall -INT slcand &> /dev/null', ignore_failure=True)
         time.sleep(1)
 
-        # Making sure the interface can be open
-        with open(args.iface, 'bw') as _f:
-            pass
+        tty = os.path.realpath(args.iface).replace('/dev/', '')
+        logger.debug('TTY %r', tty)
 
-        return args.iface
+        execute_shell_command('slcan_attach -f -o -s%d /dev/%s', speed_code, tty)
+        execute_shell_command('slcand %s', tty)
+
+        time.sleep(1)
+        execute_shell_command('ifconfig %s up', iface_name)
+        execute_shell_command('ifconfig %s txqueuelen 1000', iface_name)
+
+        return iface_name
 
 
 def check_interfaces():
