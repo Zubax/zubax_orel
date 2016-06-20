@@ -211,7 +211,7 @@ def test_uavcan():
                                 opcode=uavcan.protocol.param.ExecuteOpcode.Request().OPCODE_ERASE)).ok,
                     'The node refused to reset configuration to factory defaults')
 
-            col_esc_status = uavcan.app.message_collector.MessageCollector(n, uavcan.equipment.esc.Status, timeout=2)
+            col_esc_status = uavcan.app.message_collector.MessageCollector(n, uavcan.equipment.esc.Status, timeout=10)
 
             def check_everything(check_rotation=False):
                 check_status()
