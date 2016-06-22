@@ -23,7 +23,7 @@ sys.path.insert(1, os.path.join(sys.path[0], 'pyuavcan'))
 from drwatson import init, run, make_api_context_with_user_provided_credentials, execute_shell_command,\
     info, error, input, CLIWaitCursor, download, abort, glob_one, download_newest, open_serial_port,\
     enforce, SerialCLI, BackgroundSpinner, fatal, warning, BackgroundDelay, imperative, \
-    load_firmware_via_gdb, convert_units_from_to, BackgroundCLIListener
+    load_firmware_via_gdb, convert_units_from_to, BackgroundCLIListener, DrwatsonException
 import logging
 import time
 import yaml
