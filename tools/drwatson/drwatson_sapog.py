@@ -22,8 +22,8 @@ sys.path.insert(1, os.path.join(sys.path[0], 'pyuavcan'))
 
 from drwatson import init, run, make_api_context_with_user_provided_credentials, execute_shell_command,\
     info, error, input, CLIWaitCursor, download, abort, glob_one, download_newest, open_serial_port,\
-    enforce, SerialCLI, BackgroundSpinner, fatal, warning, BackgroundDelay, imperative, \
-    load_firmware_via_gdb, convert_units_from_to, BackgroundCLIListener, DrwatsonException
+    enforce, SerialCLI, BackgroundSpinner, fatal, BackgroundDelay, imperative, \
+    load_firmware_via_gdb, convert_units_from_to, BackgroundCLIListener
 import logging
 import time
 import yaml
@@ -321,39 +321,15 @@ def init_can_iface():
     else:
         logger.debug('Using iface %r as SLCAN', args.iface)
 
-        iface_name = 'slcan0'
-        try:
-            execute_shell_command('ifconfig %s up', iface_name)
-        except DrwatsonException:
-            logger.info('%s is not working, reinitializing...', iface_name)
-            pass
-        else:
-            logger.info('%s is already available, using as-is', iface_name)
-            return iface_name
-
-        speed_code = {
-            1000000: 8,
-            500000: 6,
-            250000: 5,
-            125000: 4,
-            100000: 3
-        }[CAN_BITRATE]
-
         # We don't want the SLCAN daemon to interfere...
         execute_shell_command('killall -INT slcand &> /dev/null', ignore_failure=True)
         time.sleep(1)
 
-        tty = os.path.realpath(args.iface).replace('/dev/', '')
-        logger.debug('TTY %r', tty)
+        # Making sure the interface can be open
+        with open(args.iface, 'bw') as _f:
+            pass
 
-        execute_shell_command('slcan_attach -f -o -s%d /dev/%s', speed_code, tty)
-        execute_shell_command('slcand %s', tty)
-
-        time.sleep(1)
-        execute_shell_command('ifconfig %s up', iface_name)
-        execute_shell_command('ifconfig %s txqueuelen 1000', iface_name)
-
-        return iface_name
+        return args.iface
 
 
 def check_interfaces():
