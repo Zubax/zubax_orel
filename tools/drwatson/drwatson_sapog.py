@@ -36,7 +36,7 @@ from functools import partial
 
 PRODUCT_NAME = 'io.px4.sapog'
 DEFAULT_FIRMWARE_GLOB = 'https://files.zubax.com/products/%s/*.compound.bin' % PRODUCT_NAME
-CAN_BITRATE = 125000
+CAN_BITRATE = 250000
 FLASH_OFFSET = 0x08000000
 TOOLCHAIN_PREFIX = 'arm-none-eabi-'
 DEBUGGER_PORT_GDB_GLOB = '/dev/serial/by-id/*Black_Magic_Probe*-if00'
@@ -44,7 +44,7 @@ DEBUGGER_PORT_CLI_GLOB = '/dev/serial/by-id/*Black_Magic_Probe*-if02'
 BOOT_TIMEOUT = 10
 END_OF_BOOT_LOG_TIMEOUT = 3
 
-TEMPERATURE_RANGE_DEGC = 10, 70
+TEMPERATURE_RANGE_DEGC = 10, 80
 ESC_ERROR_LIMIT = 1000
 STARTUP_DUTY_CYCLE = 0.001
 STABILITY_TEST_DUTY_CYCLES = [0.3, 0.6]
@@ -102,7 +102,7 @@ def wait_for_boot():
                     if not timed_out:
                         cli_logger.info(repr(line))
 
-                        if PRODUCT_NAME in line:
+                        if PRODUCT_NAME.lower() in line.lower() and 'bootloader' not in line.lower():
                             info('Boot confirmed')
                             boot_notification_received = True
 
@@ -222,7 +222,7 @@ def test_uavcan():
                     abort('Rock is dead.')
                 else:
                     if check_rotation:
-                        enforce(m.rpm > 0 and m.power_rating_pct > 0, 'Could not start the motor')
+                        enforce(m.rpm > 100 and m.power_rating_pct > 0, 'Could not start the motor')
                         enforce(m.current > 0, 'Current is not positive')
 
                     enforce(m.error_count < ESC_ERROR_LIMIT, 'High error count: %r', m.error_count)
