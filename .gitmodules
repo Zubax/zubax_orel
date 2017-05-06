@@ -4,3 +4,6 @@
 [submodule "tools/drwatson/pyuavcan"]
 	path = tools/drwatson/pyuavcan
 	url = https://github.com/uavcan/pyuavcan
+[submodule "docs/datasheet/document_templates"]
+	path = docs/datasheet/document_templates
+	url = https://github.com/Zubax/document_templates
