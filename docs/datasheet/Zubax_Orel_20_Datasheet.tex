@@ -81,9 +81,14 @@ Please refer to the Sapog Reference Manual\footnote{Available from the Zubax Rob
 for its usage information.
 This datasheet is focused only on the hardware aspect of the product.
 
-\section{Integration into the end system}
+\section{System integration}
 
-TODO: Power supply inputs; CAN does not require any power input.
+Zubax Orel 20 is a single supply device, which means that the device does
+not require any supply inputs except for the high power supply.
+The DroneCode Debug Port (UART/RCPWM) provides access to the device's internal 3.3 V rail,
+although it is not designed to provide power to any external loads.
+The 5 V rails of the CAN interfaces are not used by the device; rather,
+they connect the 5 V pins of their respective CAN connector pairs directly together.
 
 \begin{figure}[hb]
     \centering
