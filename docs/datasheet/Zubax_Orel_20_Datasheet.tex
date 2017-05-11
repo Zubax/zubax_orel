@@ -25,7 +25,7 @@ firmware.
 \begin{itemize}
     \item Excellent dynamic characteristics.
     \item Regenerative braking and active freewheeling.
-    \item 350 W continuous power output at under 20 g weight.
+    \item 350 W continuous power output at under 10 g weight.
     \item Optional RPM control loop (RPM governor).
     \item Self diagnostics and health status reporting.
     \item Highly configurable.
@@ -81,6 +81,17 @@ Please refer to the Sapog Reference Manual\footnote{Available from the Zubax Rob
 for its usage information.
 This datasheet is focused only on the hardware aspect of the product.
 
+\section{Integration into the end system}
+
+TODO: Power supply inputs; CAN does not require any power input.
+
+\begin{figure}[hb]
+    \centering
+	\includegraphics[width=\textwidth]{can_daisy_chain}
+	\caption{Connection of CAN nodes in non-redundant and doubly redundant CAN bus configurations.
+	\label{can_daisy_chain_non_redundant}}
+\end{figure}
+
 \section{Quality assurance}
 
 Every manufactured Zubax Orel 20 undergoes an automated testing procedure that validates that
@@ -95,10 +106,10 @@ that can be used as a strong protection against unlicensed or counterfeit manufa
 Please refer to the dedicated documents or contact Zubax Robotics to find out
 the specifics about digital signature verification.
 
-\section{Enclosure}
+\section{Enclosure}\label{sec:enclosure}
 
 Zubax Orel 20 is intended for integration into the end system in the form of the bare PCB,
-as this would facilitate better heat dissipation, lower weight and tighter arrangement of components
+as this facilitates better heat dissipation, lower weight and tighter arrangement of components
 in the end device, all of which are desirable properties in the target application domains.
 
 Shall it be desired to provide additional mechanical protection for the device,
@@ -114,7 +125,121 @@ alternatively, visit \url{https://github.com/Zubax/zubax_orel} to download
 	\caption{Plastic enclosure.\label{enclosure}}
 \end{figure}
 
+\section{Accessories}
+
+Zubax Orel 20 can be used with the following accesories:
+
+\begin{itemize}
+    \item Enclosure (suitable for 3D printing). See section \ref{sec:enclosure}.
+    \item UAVCAN Micro Patch Cable.
+    \item UAVCAN Micro to DF13 Adapter Cable.
+    \item UAVCAN Micro Termination Plug.
+    \item Zubax DroneCode Debug Probe.
+\end{itemize}
+
+Please contact your supplier for ordering information.
+
 \chapter{Characteristics}
+
+\section{Absolute maximum ratings}
+
+Subjecting the device to stresses beyond those specified in this section may cause
+permanent damage to the device.
+Proper operation of the device within the ranges specified in this section is not implied.
+
+\begin{ZubaxSimpleTable}{Absolute maximum ratings}{|c X|c c|c|}
+    Symbol            & Parameter                & Min  & Max & Units \\
+	$V_\text{inv}$    & Supply voltage           & -0.3 & 19  & V \\
+	$T_\text{oper}$   & Operating temperature    & -50  & 125 & \degree{}C \\
+	                  & UART/RCPWM input voltage & -0.3 & 7   & V\\
+	                  & CAN H/L input voltage    & -4   & 16  & V\\
+\end{ZubaxSimpleTable}
+
+\section{Environmental conditions}
+
+\begin{ZubaxSimpleTable}{Environmental conditions}{|c X|l|c c|c|}
+    Symbol & Parameter & Note & Min & Max & Units \\
+	$T_\text{oper}$ & Operating temperature &                            & -40 & 105 & \degree{}C \\
+	$T_\text{stor}$ & Storage temperature   &                            & -40 & 50  & \degree{}C \\
+	$\phi_\text{oper}$ & Operating humidity & Condensation not permitted & 0   & 100 & \%RH\\
+	$h_\text{oper}$ & Operating altitude    & Above mean sea level (MSL) &     & 10  & km\\
+\end{ZubaxSimpleTable}
+
+\section{Reliability}
+
+\begin{ZubaxSimpleTable}{Reliability}{|c X|c|c|}
+    Symbol & Parameter & Typ & Units \\
+	MTTF   & Mean time to failure & 100000 & hours \\
+\end{ZubaxSimpleTable}
+
+\section{Power characteristics}
+
+During regenerative braking, the device will be performing energy transfer from the motor
+to the power supply network.
+If the self resistance of the power supply network is not sufficiently low,
+the regenerative energy transfer may lead to increase of the supply voltage beyond
+the safe operating limits.
+This event will trigger activation of the transient voltage suppression (TVS) circuit,
+which will absorb some of the excessive energy.
+If the amount of recovered energy exceeds the absorbtion capabilities of the power supply
+network and the TVS circuit, the device may incur fatal damage.
+
+\begin{ZubaxTableWrapper}{Power characteristics}
+	\begin{ZubaxWrappedTable}{|c X|c c c|c|}
+	    Symbol & Parameter & Min & Typ & Max & Units \\
+		$P$                 & Continuous power                    &      &      & 350  & W \\
+		$P_\text{peak}$     & Peak power                          &      &      & 1000 & W \\
+		$I_\text{inv}$      & Continuous DC current               &      &      & 20   & A \\
+		$I_\text{inv-peak}$ & Peak DC current                     &      &      & 55   & A \\
+		$I_\text{idle}$     & Idle current consumption            &      & 50   &      & mA \\
+		$V_\text{inv}$      & Supply voltage\tnote{1}             & 9    & 14.8 & 18.5 & V \\
+	    $V_\text{TVS}$      & TVS circuit activation voltage      & 19   &      & 21   & V \\
+	    $P_\text{TVS}$      & TVS circuit energy absorbtion
+	                          capability\tnote{2}                 &      & 5    &      & J \\
+		$\theta_\text{JA}$  & Junction-to-air thermal resistance  &      & 50   &      & K/W \\
+	    $R_\text{DS-on}$    & FET drain-source on-state resistance&      & 1.6  & 1.9  & $\text{m}\Omega$ \\
+	    $R_\text{phase}$    & Cumulative resistance of the
+	                          inverter per phase               &      & 5    &      & $\text{m}\Omega$ \\
+	\end{ZubaxWrappedTable}
+	\begin{tablenotes}
+	    \item [1] Suitable Lithium-ion battery packs per chemistry type:\\
+	    \begin{ZubaxCompactTable}{|c c|}
+		    Chemistry         & Cells in series [S]\\
+		    $\text{LiCoO}_2$  & \numrange{3}{4}\\
+		    $\text{LiFePO}_4$ & \numrange{4}{5}\\
+	    \end{ZubaxCompactTable}
+
+	    \item [2] At $T = 25\text{\degree{}C}$, non-repetitive.
+	\end{tablenotes}
+\end{ZubaxTableWrapper}
+
+\section{Communication interfaces}
+
+\begin{ZubaxSimpleTable}{CAN bus interface characteristics}{|c X|c c c|c|}
+	Symbol  & Parameter                                 & Min  & Typ  & Max  & Units \\
+	        & Bit rate                                  & 20   &      & 1000 & Kbps\\
+	        & Positive-going input threshold voltage    &      & 750  & 900  & mV\\
+	        & Negative-going input threshold voltage    & 500  & 600  &      & mV\\
+	        & Differential output voltage, dominant     & 1.5  & 2.0  & 3.0  & V\\
+	        & Differential output voltage, recessive    & -120 & 0    & 12   & mV\\
+	        & Connector resistance during device lifetime &    & 30   & 50   & $\text{m}\Omega$\\
+\end{ZubaxSimpleTable}
+
+\begin{ZubaxSimpleTable}{UART interface characteristics}{|c X|c c c|c|}
+	Symbol  & Parameter                                 & Min  & Typ  & Max  & Units \\
+			& Low-level input voltage                   & -0.3 & 0    & 1.6  & V\\
+			& High-level input voltage                  & 2.1  & 3.3  & 5.5  & V\\
+			& Low-level output voltage                  & 0    & 0    & 0.5  & V\\
+			& High-level output voltage                 & 2.8  & 3.3  & 3.4  & V\\
+			& Source/sink current                       &      &      & 10   & mA\\
+	        & Connector resistance during device lifetime &    & 20   & 40   & $\text{m}\Omega$\\
+\end{ZubaxSimpleTable}
+
+\begin{ZubaxSimpleTable}{RCPWM input interface characteristics}{|c X|c c c|c|}
+	Symbol  & Parameter                                 & Min  & Typ  & Max  & Units \\
+			& Low-level input voltage                   & -0.3 & 0    & 1.6  & V\\
+			& High-level input voltage                  & 2.1  & 3.3  & 5.5  & V\\
+\end{ZubaxSimpleTable}
 
 \section{Mechanical characteristics}
 
@@ -133,18 +258,17 @@ For reference, the red (positive) power supply wire is connected to the top side
 	\caption{PCB drawing (to scale).\label{drawing}}
 \end{figure}
 
-\section{Operating conditions}
+\begin{ZubaxSimpleTable}{Mechanical characteristics}{|c X|l|c|c|}
+    Symbol & Parameter & Note                     & Typ & Units \\
+	$m$    & Mass      & Power wires not included & 10  & g \\
+\end{ZubaxSimpleTable}
 
-\begin{tabular}[l]{|l|l|l|l|l|}
-	\hline
-	\bfseries Parameter          & \bfseries Minimum & \bfseries Maximum & \bfseries Units & \bfseries Note \\
-	\hline
-	Board temperature  & -40     & 105     & \degree{}C & \\
-	\hline
-	Relative humidity  & 0       & 100     & \%RH  & Non-condensing\\
-	\hline
-\end{tabular}
+\chapter{Communication interfaces}
 
-\section{Electrical characteristics}
+\section{CAN bus}
+
+\section{UART}
+
+\section{RCPWM}
 
 \end{document}
