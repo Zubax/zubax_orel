@@ -85,10 +85,10 @@ This datasheet is focused only on the hardware aspect of the product.
 
 Zubax Orel 20 is a single supply device, which means that the device does
 not require any supply inputs except for the high power supply.
-The DroneCode Debug Port (UART/RCPWM) provides access to the device's internal 3.3 V rail,
+The DroneCode debug port (UART/RCPWM) provides access to the device's internal 3.3 V rail,
 although it is not designed to provide power to any external loads.
 The 5 V rails of the CAN interfaces are not used by the device; rather,
-they connect the 5 V pins of their respective CAN connector pairs directly together.
+they connect the 5 V rails of their respective CAN connector pairs directly together.
 
 \begin{figure}[hb]
     \centering
@@ -136,9 +136,9 @@ Zubax Orel 20 can be used with the following accesories:
 
 \begin{itemize}
     \item Enclosure (suitable for 3D printing). See section \ref{sec:enclosure}.
-    \item UAVCAN Micro Patch Cable.
-    \item UAVCAN Micro to DF13 Adapter Cable.
-    \item UAVCAN Micro Termination Plug.
+    \item UAVCAN Micro patch cable.
+    \item UAVCAN Micro adapter cables.
+    \item UAVCAN Micro termination plug.
     \item Zubax DroneCode Debug Probe.
 \end{itemize}
 
@@ -207,11 +207,13 @@ network and the TVS circuit, the device may incur fatal damage.
 	                          inverter per phase               &      & 5    &      & $\text{m}\Omega$ \\
 	\end{ZubaxWrappedTable}
 	\begin{tablenotes}
-	    \item [1] Suitable Lithium-ion battery packs per chemistry type:\\
-	    \begin{ZubaxCompactTable}{|c c|}
-		    Chemistry         & Cells in series [S]\\
-		    $\text{LiCoO}_2$  & \numrange{3}{4}\\
-		    $\text{LiFePO}_4$ & \numrange{4}{5}\\
+	    \item [1] Suitable battery packs per chemistry type:\\
+	    \begin{ZubaxCompactTable}{|c c c|}
+		    Chemistry         & Nominal cell voltage [V] & Cells in series [S]\\
+		    $\text{LiCoO}_2$  & 3.7                      & \numrange{3}{4}\\
+		    $\text{LiFePO}_4$ & 3.3                      & \numrange{4}{5}\\
+		    $\text{NiCd}$, $\text{NiMH}$ & 1.2           & \numrange{10}{12}\\
+		    $\text{Pb}$       & 2.0                      & \numrange{6}{8}\\
 	    \end{ZubaxCompactTable}
 
 	    \item [2] At $T = 25\text{\degree{}C}$, non-repetitive.
@@ -220,23 +222,32 @@ network and the TVS circuit, the device may incur fatal damage.
 
 \section{Communication interfaces}
 
-\begin{ZubaxSimpleTable}{CAN bus interface characteristics}{|c X|c c c|c|}
-	Symbol  & Parameter                                 & Min  & Typ  & Max  & Units \\
-	        & Bit rate                                  & 20   &      & 1000 & Kbps\\
-	        & Positive-going input threshold voltage    &      & 750  & 900  & mV\\
-	        & Negative-going input threshold voltage    & 500  & 600  &      & mV\\
-	        & Differential output voltage, dominant     & 1.5  & 2.0  & 3.0  & V\\
-	        & Differential output voltage, recessive    & -120 & 0    & 12   & mV\\
-	        & Connector resistance during device lifetime &    & 30   & 50   & $\text{m}\Omega$\\
-\end{ZubaxSimpleTable}
+\begin{ZubaxTableWrapper}{Characteristics of CAN bus interfaces}
+	\begin{ZubaxWrappedTable}{|c X|c c c|c|}
+		Symbol  & Parameter                                 & Min  & Typ  & Max  & Units \\
+		        & Bit rate                                  & 20   &      & 1000 & Kbps \\
+		        & Positive-going input threshold voltage    &      & 750  & 900  & mV \\
+		        & Negative-going input threshold voltage    & 500  & 600  &      & mV \\
+		        & Differential output voltage, dominant     & 1.5  & 2.0  & 3.0  & V \\
+		        & Differential output voltage, recessive    & -120 & 0    & 12   & mV \\
+		        & Bus power rail\tnote{1}\space{} voltage           & -10  &      & 10   & V \\
+		        & Bus power rail\tnote{1}\space{} inter-connector current & -1 &  & 1    & A \\
+		        & Connector resistance during device lifetime &    & 30   & 50   & $\text{m}\Omega$ \\
+	\end{ZubaxWrappedTable}
+	\begin{tablenotes}
+	    \item [1] Not connected to the device's circuits internally. The limit is imposed by the PCB.
+	\end{tablenotes}
+\end{ZubaxTableWrapper}
 
-\begin{ZubaxSimpleTable}{UART interface characteristics}{|c X|c c c|c|}
+\begin{ZubaxSimpleTable}{DroneCode debug port characteristics}{|c X|c c c|c|}
 	Symbol  & Parameter                                 & Min  & Typ  & Max  & Units \\
 			& Low-level input voltage                   & -0.3 & 0    & 1.6  & V\\
 			& High-level input voltage                  & 2.1  & 3.3  & 5.5  & V\\
 			& Low-level output voltage                  & 0    & 0    & 0.5  & V\\
 			& High-level output voltage                 & 2.8  & 3.3  & 3.4  & V\\
-			& Source/sink current                       &      &      & 10   & mA\\
+			& Source/sink current via data pins         &      &      & 10   & mA\\
+	$V_\text{DCDP}$ & Power rail output voltage         & 3.2  & 3.3  & 3.4  & V\\
+	$I_\text{DCDP}$ & Power rail load capability        &      &      & 3    & mA\\
 	        & Connector resistance during device lifetime &    & 20   & 40   & $\text{m}\Omega$\\
 \end{ZubaxSimpleTable}
 
