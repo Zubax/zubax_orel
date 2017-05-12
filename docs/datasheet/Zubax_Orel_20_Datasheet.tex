@@ -25,11 +25,11 @@ firmware.
 \begin{itemize}
     \item Excellent dynamic characteristics.
     \item Regenerative braking and active freewheeling.
-    \item 350 W continuous power output at under 10 g weight.
+    \item 350 W continuous power output at 10 g weight.
     \item Optional RPM control loop (RPM governor).
     \item Self diagnostics and health status reporting.
     \item Highly configurable.
-    \item Low noise and low current ripple due to low ESR filtering capacitors and high frequency PWM.
+    \item Low noise and low current ripple due to low ESR embedded filtering capacitors and high frequency PWM.
     \item Supported interfaces:
     \begin{itemize}
         \item CAN (UAVCAN), with optional double redundancy.
@@ -242,8 +242,18 @@ joined in parallel.
 The power rails of the connector pairs are not connected to the device's internal circuitry,
 since Zubax Orel 20 does not consume or provide power to the CAN bus.
 
-Note that CAN2 (the secondary CAN bus interface) can only be used in configurations with redundant CAN bus.
+The device does not terminate the CAN bus internally.
+
+CAN2 (the secondary CAN bus interface) can only be used in configurations with redundant CAN bus.
 If the bus is not redundant, only CAN1 (the primary CAN bus interface) can be used.
+
+\begin{ZubaxSimpleTable}{CAN bus connectors pinout}{|c X X X[3]|}
+	Pin no. & Type         & Name      & Comment \\
+	1       & Power        & PWR       & Not connected to the device's circuits internally.\\
+	2       & Input/Output & CAN H     & \\
+	3       & Input/Output & CAN L     & \\
+	4       & Ground       & GND       & \\
+\end{ZubaxSimpleTable}
 
 \begin{ZubaxTableWrapper}{Characteristics of CAN bus interfaces}
 	\begin{ZubaxWrappedTable}{|c X|c c c|c|}
@@ -253,12 +263,12 @@ If the bus is not redundant, only CAN1 (the primary CAN bus interface) can be us
 		        & Negative-going input threshold voltage    & 500  & 600  &      & mV \\
 		        & Differential output voltage, dominant     & 1.5  & 2.0  & 3.0  & V \\
 		        & Differential output voltage, recessive    & -120 & 0    & 12   & mV \\
-		        & Bus power rail\tnote{1}\space{} voltage           & -10  &      & 10   & V \\
-		        & Bus power rail\tnote{1}\space{} inter-connector current & -1 &  & 1    & A \\
+		        & Bus power rail\tnote{1}\space{} voltage   & -10  &      & 10   & V \\
+		        & Inter-connector current\tnote{1}          & -1 &  & 1    & A \\
 		        & Connector resistance during device lifetime &    & 30   & 50   & $\text{m}\Omega$ \\
 	\end{ZubaxWrappedTable}
 	\begin{tablenotes}
-	    \item [1] Not connected to the device's circuits internally. The limit is imposed by the PCB.
+	    \item [1] The limit is imposed by the PCB.
 	\end{tablenotes}
 \end{ZubaxTableWrapper}
 
@@ -328,8 +338,8 @@ For reference, the red (positive) power supply wire is connected to the top side
 \end{figure}
 
 \begin{ZubaxSimpleTable}{Mechanical characteristics}{|c X|l|c|c|}
-    Symbol & Parameter & Note                     & Typ & Units \\
-	$m$    & Mass      & Power wires not included & 10  & g \\
+    Symbol & Parameter & Note                          & Typ & Units \\
+	$m$    & Mass      & Power connectors not included & 10  & g \\
 \end{ZubaxSimpleTable}
 
 \end{document}
