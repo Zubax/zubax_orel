@@ -153,7 +153,7 @@ permanent damage to the device.
 Proper operation of the device within the ranges specified in this section is not implied.
 
 \begin{ZubaxSimpleTable}{Absolute maximum ratings}{|c X|c c|c|}
-    Symbol            & Parameter                & Min  & Max & Units \\
+    Symbol            & Parameter                & Min  & Max & Unit \\
 	$V_\text{inv}$    & Supply voltage           & -0.3 & 19  & V \\
 	$T_\text{oper}$   & Operating temperature    & -50  & 125 & \degree{}C \\
 	                  & UART/RCPWM input voltage & -0.3 & 7   & V\\
@@ -163,7 +163,7 @@ Proper operation of the device within the ranges specified in this section is no
 \section{Environmental conditions}
 
 \begin{ZubaxSimpleTable}{Environmental conditions}{|c X|l|c c|c|}
-    Symbol & Parameter & Note & Min & Max & Units \\
+    Symbol & Parameter & Note & Min & Max & Unit \\
 	$T_\text{oper}$ & Operating temperature &                            & -40 & 105 & \degree{}C \\
 	$T_\text{stor}$ & Storage temperature   &                            & -40 & 50  & \degree{}C \\
 	$\phi_\text{oper}$ & Operating humidity & Condensation not permitted & 0   & 100 & \%RH\\
@@ -173,7 +173,7 @@ Proper operation of the device within the ranges specified in this section is no
 \section{Reliability}
 
 \begin{ZubaxSimpleTable}{Reliability}{|c X|c|c|}
-    Symbol & Parameter & Typ & Units \\
+    Symbol & Parameter & Typ & Unit \\
 	MTTF   & Mean time to failure & 100000 & hours \\
 \end{ZubaxSimpleTable}
 
@@ -181,7 +181,7 @@ Proper operation of the device within the ranges specified in this section is no
 
 \begin{ZubaxTableWrapper}{Power characteristics}
 	\begin{ZubaxWrappedTable}{|c X|c c c|c|}
-	    Symbol & Parameter & Min & Typ & Max & Units \\
+	    Symbol & Parameter & Min & Typ & Max & Unit \\
 		$P$                 & Continuous power                    &      &      & 350  & W \\
 		$P_\text{peak}$     & Peak power                          &      &      & 1000 & W \\
 		$I_\text{inv}$      & Continuous DC current               &      &      & 20   & A \\
@@ -261,7 +261,7 @@ If the bus is not redundant, only CAN1 (the primary CAN bus interface) can be us
 
 \begin{ZubaxTableWrapper}{Characteristics of CAN bus interfaces}
 	\begin{ZubaxWrappedTable}{|c X|c c c|c|}
-		Symbol  & Parameter                                 & Min  & Typ  & Max  & Units \\
+		Symbol  & Parameter                                 & Min  & Typ  & Max  & Unit \\
 		        & Bit rate                                  & 20   &      & 1000 & Kbps \\
 		        & Positive-going input threshold voltage    &      & 750  & 900  & mV \\
 		        & Negative-going input threshold voltage    & 500  & 600  &      & mV \\
@@ -300,7 +300,7 @@ as that may cause unpredictable behavior of the RCPWM interface.
 \end{ZubaxSimpleTable}
 
 \begin{ZubaxSimpleTable}{DroneCode debug port characteristics}{|c X|c c c|c|}
-	Symbol  & Parameter                                 & Min  & Typ  & Max  & Units \\
+	Symbol  & Parameter                                 & Min  & Typ  & Max  & Unit \\
 			& Low-level input voltage                   & -0.3 & 0    & 1.6  & V\\
 			& High-level input voltage                  & 2.1  & 3.3  & 5.5  & V\\
 			& Low-level output voltage                  & 0    & 0    & 0.5  & V\\
@@ -319,7 +319,7 @@ This connection point is connected directly to the UART RX pin,
 and so it does not constitute an independent interface.
 
 \begin{ZubaxSimpleTable}{RCPWM input interface characteristics}{|c X|c c c|c|}
-	Symbol  & Parameter                                 & Min  & Typ  & Max  & Units \\
+	Symbol  & Parameter                                 & Min  & Typ  & Max  & Unit \\
 			& Low-level input voltage                   & -0.3 & 0    & 1.6  & V\\
 			& High-level input voltage                  & 2.1  & 3.3  & 5.5  & V\\
 \end{ZubaxSimpleTable}
@@ -342,7 +342,7 @@ For reference, the red (positive) power supply wire is connected to the top side
 \end{figure}
 
 \begin{ZubaxSimpleTable}{Mechanical characteristics}{|c X|l|c|c|}
-    Symbol & Parameter & Note                          & Typ & Units \\
+    Symbol & Parameter & Note                          & Typ & Unit \\
 	$m$    & Mass      & Power connectors not included & 10  & g \\
 \end{ZubaxSimpleTable}
 
