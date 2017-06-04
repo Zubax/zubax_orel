@@ -109,8 +109,8 @@ provide additional safety assurances.
 
 Besides testing, every manufactured device has a digital signature installed,
 that can be used as a strong protection against unlicensed or counterfeit manufacturing.
-Please refer to the dedicated documents or contact Zubax Robotics to find out
-the specifics about digital signature verification.
+Please refer to the section \ref{sec:certificate_of_authenticity} or contact Zubax Robotics
+to find out the specifics about digital signature verification.
 
 \section{Enclosure}\label{sec:enclosure}
 
@@ -355,5 +355,63 @@ For reference, the red (positive) power supply wire is connected to the top side
     Symbol & Parameter & Note                          & Typ & Unit \\
 	$m$    & Mass      & Power connectors not included & 10  & g \\
 \end{ZubaxSimpleTable}
+
+\chapter{Device identification}
+
+\section{Hardware version number}
+
+Zubax Orel 20 reports to the Sapog firmware the following hardware version number
+(in the form major.minor): 1.1.
+
+The hardware version number can be used to determine whether the Sapog firmware
+is running on a Zubax Orel 20 or not.
+
+\section{Certificate of authenticity}\label{sec:certificate_of_authenticity}
+
+The Sapog firmware can provide the certificate of authenticity (CoA),
+if one is found installed on the hardware that the firmware is running on.
+The details covering how to request the CoA from Sapog fall outside of the scope of this document;
+the reader is advised to refer to the Sapog Reference Manual for explanations.
+
+Every manufactured instance of Zubax Orel 20 contains a valid CoA, which is an RSA-1024 digital signature
+computed over the following ASCII plaintext string hashed through SHA-512:
+
+\verb|<UID>io.px4.sapog|
+
+Where \verb|<UID>| is a placeholder for the 128-bit unique ID represented in raw bytes.
+It can be seen that the overall length of the plaintext is always 28 bytes.
+
+For example, consider an instance of Zubax Orel 20 which has the following unique ID:
+
+\verb|33ffd505474735362934204300000000|
+
+The plaintext would be the following (where \verb|\x| is a hexadecimal escape sequence):
+
+\verb|\x33\xff\xd5\x05\x47\x47\x35\x36\x29\x34\x20\x43\x00\x00\x00\x00io.px4.sapog|
+
+The valid signature (CoA) for the above plaintext would be the following:
+
+\begin{minipage}{0.7\textwidth}
+\begin{verbatim}
+c1fbfaf5ab835be10c5c5db94b304f22beed4d58bcaf9cbc83a539f588ae6b32
+ab570c0e82e1916c186e447390560df299f6085387ab08cc84d79542ca619c73
+600e3e6b52ad3db65616f78d7eb845c159d72014c79daf5474ec3fb1499ed6c2
+32fc94bb26481c8acdf5a3e0022daf17e80378a6137776222b65d59454066cbd
+\end{verbatim}
+\end{minipage}
+
+The signature (CoA) of the plaintext can be verified against the following RSA-1024 public key
+using the SHA-512 hash function:
+
+\begin{minipage}{0.7\textwidth}
+\begin{verbatim}
+-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLrAYWFBmjnYnDaktbSBtpdoqG
+Vey7unzbVe8db+JF0i+kQfW3hT1/UEJo7hIImpSQhB5/AtNtQ1kKF6r3VmhdjqCD
+naoZfTnnybMs4J+JNSMZheaVFy5lmmpzzi4a3eEd7g26Qid1sWcfamiGRIqynia6
+e2YOkFIAloBGphQjxQIDAQAB
+-----END PUBLIC KEY-----
+\end{verbatim}
+\end{minipage}
 
 \end{document}
