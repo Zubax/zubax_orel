@@ -9,6 +9,8 @@
 
 \title{Zubax Orel 20 Datasheet}
 
+\hbadness=10000
+
 \begin{document}
 \frontmatter
 
@@ -17,7 +19,7 @@
 \section*{Overview}
 
 Zubax Orel 20 is an advanced sensorless BLDC propeller drive controller with doubly redundant CAN bus interface.
-Zubax Orel 20 runs the Sapog\footnote{Refer to the Sapog Reference Manual for information.}
+Zubax Orel 20 runs the Sapog\footnote{Refer to the Sapog Reference Manual for information about the firmware.}
 firmware.
 
 \section*{Features}
@@ -29,17 +31,18 @@ firmware.
     \item Optional RPM control loop (RPM governor).
     \item Self diagnostics and health status reporting.
     \item Highly configurable.
-    \item Low noise and low current ripple due to low ESR embedded filtering capacitors and high frequency PWM.
+    \item Low noise and low current ripple due to the low-\allowbreak{}ESR embedded filtering capacitors and
+    high-\allowbreak{}frequency PWM.
     \item Supported interfaces:
     \begin{itemize}
-        \item CAN, with optional double redundancy.
+        \item CAN, with optional dual redundancy.
         \item UART.
         \item RCPWM (analog PWM interface widely used in robotics).
     \end{itemize}
     \item High quality assurance:
     \begin{itemize}
         \item Every manufactured unit undergoes a strict testing procedure.
-        The testing log for each produced unit is available to the user via the website at\\
+        The testing log for each produced unit is available to the user via the website at
         \url{https://device.zubax.com/device_info}.
         \item Protection against unlicensed (counterfeit) production by means of a digital signature
         installed on every manufactured unit.
@@ -51,8 +54,8 @@ firmware.
 \section*{Applications}
 
 \begin{itemize}
-    \item Propeller drives for unmanned aerial vehicles.
-    \item Pump and propeller drives for unmanned watercraft.
+    \item Propeller drives for light unmanned aerial vehicles.
+    \item Pump and propeller drives for un\-man\-ned wa\-ter\-craft.
 \end{itemize}
 
 \centering
@@ -85,11 +88,12 @@ This datasheet is focused only on the hardware aspect of the product.
 \section{System integration}
 
 Zubax Orel 20 is a single supply device, which means that the device does
-not require any supply inputs except for the high power supply.
+not expose any power supply inputs except for the high power supply.
 The 5 V rails of the CAN interfaces are not used by the device; rather,
 they connect the 5 V rails of their respective CAN connector pairs directly together.
 
-Application-specific integration documentation is available on the Zubax Robotics website.
+Application-specific integration documentation is available on the Zubax Knowledge Base at
+\mbox{\url{https://kb.zubax.com}}.
 
 \begin{figure}[hb]
     \centering
@@ -107,29 +111,13 @@ The test log for every manufactured device is available on the web at
 This feature can be used to facilitate traceability of purchased devices and
 provide additional safety assurances.
 
-Besides testing, every manufactured device has a digital signature installed,
-that can be used as a strong protection against unlicensed or counterfeit manufacturing.
-Please refer to the section \ref{sec:certificate_of_authenticity} or contact Zubax Robotics
-to find out the specifics about digital signature verification.
-
-\section{Enclosure}\label{sec:enclosure}
-
-Zubax Orel 20 is intended for integration into the end system in the form of the bare PCB,
-as this facilitates better heat dissipation, lower weight and tighter arrangement of components
-in the end device, all of which are desirable properties in the target application domains.
-
-Shall it be desired to provide additional mechanical protection for the device,
-the plastic enclosure pictured on the figure \ref{enclosure} can be used.
-Please contact your supplier for the ordering information;
-alternatively, visit \url{https://github.com/Zubax/zubax_orel} to download
-3D printable enclosure models suitable for in-house manufacturing.
-
-\begin{figure}[hb]
-	\centering
-	\includegraphics[width=0.45\textwidth]{enclosure-open}
-	\includegraphics[width=0.45\textwidth]{enclosure-closed}
-	\caption{Plastic enclosure.\label{enclosure}}
-\end{figure}
+Every manufactured device has a strong digital signature stored in its non-volatile memory
+which proves the origins of the product and eliminates the risk of sourcing unlicensed or
+counterfeit hardware.
+This signature is referred to as Certificate of Authenticity (CoA).
+Please refer to the section \ref{sec:certificate_of_authenticity} and visit the
+\href{https://kb.zubax.com}{Zubax Knowledge Base} to learn more about
+the certificate of authenticity and how it can be used to trace the origins of your hardware.
 
 \section{Accessories}
 
@@ -140,18 +128,37 @@ Zubax Orel 20 can be used with the following accessories:
     \item UAVCAN Micro patch cable.
     \item UAVCAN Micro adapter cables.
     \item UAVCAN Micro termination plug.
+    \item Cables compatible with the Dronecode Autopilot Connector Standard.
     \item Zubax DroneCode Debug Probe.
 \end{itemize}
 
 Please contact your supplier for ordering information.
 
+\subsection{Enclosure}\label{sec:enclosure}
+
+Zubax Orel 20 is intended for integration into the end system in the form of the bare PCB,
+as this facilitates better heat dissipation, lower weight, and tighter arrangement of components
+in the end device, all of which are desirable properties in the targeted application domains.
+
+Shall it be desired to provide additional mechanical protection for the device,
+the plastic enclosure pictured on the figure \ref{enclosure} can be used.
+Please contact your supplier for the ordering information;
+alternatively, visit \url{https://github.com/Zubax/zubax_orel} to download
+the 3D printable enclosure models suitable for in-house manufacturing.
+
+\begin{figure}[hb]
+	\centering
+	\includegraphics[width=0.45\textwidth]{enclosure-open}
+	\includegraphics[width=0.45\textwidth]{enclosure-closed}
+	\caption{Plastic enclosure.\label{enclosure}}
+\end{figure}
+
 \chapter{Characteristics}
 
 \section{Absolute maximum ratings}
 
-Subjecting the device to stresses beyond those specified in this section may cause
-permanent damage to the device.
-Proper operation of the device within the ranges specified in this section is not implied.
+Stresses that exceed the limits specified in this section may cause permanent damage to the device.
+Proper operation of the device within the limits specified in this section is not implied.
 
 \begin{ZubaxSimpleTable}{Absolute maximum ratings}{|c X|c c|c|}
     Symbol            & Parameter                & Min  & Max & Unit \\
@@ -172,6 +179,8 @@ Proper operation of the device within the ranges specified in this section is no
 \end{ZubaxSimpleTable}
 
 \section{Reliability}
+
+Please contact Zubax Robotics for additional reliability and safety information.
 
 \begin{ZubaxSimpleTable}{Reliability}{|c X|c|c|}
     Symbol & Parameter & Typ & Unit \\
@@ -368,7 +377,7 @@ is running on a Zubax Orel 20 or not.
 
 \section{Certificate of authenticity}\label{sec:certificate_of_authenticity}
 
-The Sapog firmware can provide the certificate of authenticity (CoA),
+The Sapog firmware can report the certificate of authenticity (CoA),
 if one is found installed on the hardware that the firmware is running on.
 The details covering how to request the CoA from Sapog fall outside of the scope of this document;
 the reader is advised to refer to the Sapog Reference Manual for explanations.
