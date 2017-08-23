@@ -129,7 +129,7 @@ Zubax Orel 20 can be used with the following accessories:
     \item UAVCAN Micro adapter cables.
     \item UAVCAN Micro termination plug.
     \item Cables compatible with the Dronecode Autopilot Connector Standard.
-    \item Zubax DroneCode Debug Probe.
+    \item Zubax Dronecode Debug Probe.
 \end{itemize}
 
 Please contact your supplier for ordering information.
@@ -233,17 +233,17 @@ Please contact Zubax Robotics for additional reliability and safety information.
 
 During regenerative braking, the device performs energy transfer from the motor to the power supply network.
 If the self resistance of the power supply network is not sufficiently low,
-the regenerative energy transfer may lead to increase of the supply voltage beyond
+the regenerative energy transfer may lead to an increase of the supply voltage beyond
 the safe operating limits.
 This event will trigger activation of the transient voltage suppression (TVS) circuit,
 which will absorb some of the excessive energy.
 If the amount of recovered energy exceeds the absorption capabilities of the power supply
-network and the TVS circuit, the device may incur fatal damage.
+network and the TVS circuit, the device may incur a fatal damage.
 
-Generally, batteries are capable of absorbing the regenerated energy during braking without issues.
-Problems may arise if the device is powered from a source that does not permit reverse currents,
+Generally, batteries are capable of absorbing the energy recovered during braking without issues.
+Problems may arise if the device is powered from a source that does not permit high reverse currents,
 such as laboratory power supplies.
-In the latter case it is advised to install additional buffer capacitors to act as an energy buffer
+In that case it is advised to install additional buffer capacitors to act as an energy storage
 during braking.
 
 \subsection{Power connectors}
@@ -268,7 +268,7 @@ The device does not terminate the CAN bus internally.
 
 CAN2 (the secondary CAN bus interface) can only be used in configurations with redundant CAN bus.
 If the bus is not redundant, only CAN1 (the primary CAN bus interface) can be used.
-Connectors of unused CAN bus interfaces should be left empty.
+Connectors of the unused CAN bus interfaces should be left empty.
 
 \begin{ZubaxSimpleTable}{CAN bus connectors pinout}{|c X X X[3]|}
 	Pin no. & Type         & Name      & Comment \\
@@ -295,19 +295,19 @@ Connectors of unused CAN bus interfaces should be left empty.
 	\end{tablenotes}
 \end{ZubaxTableWrapper}
 
-\subsection{DroneCode debug port}
+\subsection{Dronecode debug port}
 
-The device features a DroneCode debug port available via the standard
-DroneCode Mini debug connector (DCD-M)\footnote{Refer to the DroneCode documentation
+The device features a Dronecode debug port available via the standard
+Dronecode Mini debug connector (DCD-M)\footnote{Refer to the DroneCode documentation
 for more information on standard connectors and communication interfaces.}.
-The DroneCode debug port provides access to the device's CLI\footnote{Command line interface.}
+The Dronecode debug port provides access to the device's CLI\footnote{Command line interface.}
 via UART, and to the RCPWM input which is shared with the UART RX line.
 
 UART and RCPWM \emph{must not be used simultaneously}.
 If RCPWM is activated, it is \emph{prohibited} to connect UART,
 as that may cause unpredictable behavior of the RCPWM interface.
 
-\begin{ZubaxSimpleTable}{DroneCode Mini debug connector pinout}{|c X X X|}
+\begin{ZubaxSimpleTable}{Dronecode Mini debug connector pinout}{|c X X X|}
 	Pin no. & Type         & Name                & Comment \\
 	1       & Power        & TPWR                & 3.3 V power output \\
 	2       & Output       & UART TX             & \\
@@ -317,7 +317,7 @@ as that may cause unpredictable behavior of the RCPWM interface.
 	6       & Ground       & GND                 & \\
 \end{ZubaxSimpleTable}
 
-\begin{ZubaxSimpleTable}{DroneCode debug port characteristics}{|c X|c c c|c|}
+\begin{ZubaxSimpleTable}{Dronecode debug port characteristics}{|c X|c c c|c|}
 	Symbol  & Parameter                                 & Min  & Typ  & Max  & Unit \\
 			& Low-level input voltage                   & -0.3 & 0    & 1.6  & V\\
 			& High-level input voltage                  & 2.1  & 3.3  & 5.5  & V\\
