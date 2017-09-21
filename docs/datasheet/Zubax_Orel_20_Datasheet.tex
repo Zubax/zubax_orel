@@ -35,7 +35,7 @@ firmware.
     high-\allowbreak{}frequency PWM.
     \item Supported interfaces:
     \begin{itemize}
-        \item CAN, with optional dual redundancy.
+        \item CAN (ISO 11898-2), with optional dual redundancy.
         \item UART.
         \item RCPWM (analog PWM interface widely used in robotics).
     \end{itemize}
@@ -190,43 +190,43 @@ Please contact Zubax Robotics for additional reliability and safety information.
 \section{Power characteristics}
 
 \begin{ZubaxTableWrapper}{Power characteristics}
-	\begin{ZubaxWrappedTable}{|c X|c c c|c|}
-	    Symbol & Parameter & Min & Typ & Max & Unit \\
-		$P$                 & Continuous power                    &      &      & 350  & W \\
-		$P_\text{peak}$     & Peak power                          &      &      & 1000 & W \\
-		$I_\text{inv}$      & Continuous DC current               &      &      & 20   & A \\
-		$I_\text{inv-peak}$ & Peak DC current                     &      &      & 55   & A \\
-		$I_\text{idle}$     & Idle current consumption            &      & 50   &      & mA \\
-		$V_\text{inv}$      & Supply voltage\tnote{1}             & 9    & 14.8 & 18.5 & V \\
-	    $V_\text{TVS}$      & TVS\tnote{2}\space{} circuit
-	                          activation voltage                  & 19   &      & 21   & V \\
-	    $P_\text{TVS}$      & TVS circuit maximum power
-	                          dissipation                         &      & 1000 &      & W \\
-	    $E_\text{TVS}$      & TVS circuit energy absorption
-	                          capability\tnote{3}                 &      & 5    &      & J \\
-		$\theta_\text{JA}$  & Junction-to-air thermal resistance  &      & 50   &      & K/W \\
-	    $R_\text{DS-on}$    & FET drain-source on-state resistance&      & 1.6  & 1.9  & $\text{m}\Omega$ \\
-	    $R_\text{phase}$    & Cumulative resistance of the
-	                          inverter per phase                  &      & 5    &      & $\text{m}\Omega$ \\
-	                        & Inverter temperature measurement
-	                          error                               & -6   &      & +6   & \degree{}C \\
-	                        & Inverter temperature measurement
-	                          range                               & -55  &      & 125  & \degree{}C \\
-	\end{ZubaxWrappedTable}
-	\begin{tablenotes}
-	    \item [1] Suitable battery packs per chemistry type:\\
-	    \begin{ZubaxCompactTable}{|c c c|}
-		    Chemistry         & Nominal cell voltage [V] & Cells in series [S]\\
-		    $\text{LiCoO}_2$  & 3.7                      & \numrange{3}{4}\\
-		    $\text{LiFePO}_4$ & 3.3                      & \numrange{4}{5}\\
-		    $\text{NiCd}$, $\text{NiMH}$ & 1.2           & \numrange{10}{12}\\
-		    $\text{Pb}$       & 2.0                      & \numrange{6}{8}\\
-	    \end{ZubaxCompactTable}
-	    
-	    \item [2] Transient voltage suppression.
+    \begin{ZubaxWrappedTable}{|c X|c c c|c|}
+        Symbol & Parameter & Min & Typ & Max & Unit \\
+    	$P$                 & Continuous power                    &      &      & 350  & W \\
+    	$P_\text{peak}$     & Peak power                          &      &      & 1000 & W \\
+    	$I_\text{inv}$      & Continuous DC current               &      &      & 20   & A \\
+    	$I_\text{inv-peak}$ & Peak DC current                     &      &      & 55   & A \\
+    	$I_\text{idle}$     & Idle current consumption            &      & 50   &      & mA \\
+        $V_\text{inv}$      & Supply voltage\tnote{a}             & 9    & 14.8 & 18.5 & V \\
+        $V_\text{TVS}$      & TVS\tnote{b}\space{} circuit
+                              activation voltage                  & 19   &      & 21   & V \\
+        $P_\text{TVS}$      & TVS circuit maximum power
+                              dissipation                         &      & 1000 &      & W \\
+        $E_\text{TVS}$      & TVS circuit energy absorption
+                              capability\tnote{c}                 &      & 5    &      & J \\
+    	$\theta_\text{JA}$  & Junction-to-air thermal resistance  &      & 50   &      & K/W \\
+        $R_\text{DS-on}$    & FET drain-source on-state resistance&      & 1.6  & 1.9  & $\text{m}\Omega$ \\
+        $R_\text{phase}$    & Cumulative resistance of the
+                              inverter per phase                  &      & 5    &      & $\text{m}\Omega$ \\
+                            & Inverter temperature measurement
+                              error                               & -6   &      & +6   & \degree{}C \\
+                            & Inverter temperature measurement
+                              range                               & -55  &      & 125  & \degree{}C \\
+    \end{ZubaxWrappedTable}
+    \begin{tablenotes}
+        \item [a] Suitable battery packs per chemistry type:\\
+        \begin{ZubaxCompactTable}{|c c c|}
+    	    Chemistry         & Nominal cell voltage [V] & Cells in series [S]\\
+    	    $\text{LiCoO}_2$  & 3.7                      & \numrange{3}{4}\\
+    	    $\text{LiFePO}_4$ & 3.3                      & \numrange{4}{5}\\
+    	    $\text{NiCd}$, $\text{NiMH}$ & 1.2           & \numrange{10}{12}\\
+    	    $\text{Pb}$       & 2.0                      & \numrange{6}{8}\\
+        \end{ZubaxCompactTable}
+        
+        \item [b] Transient voltage suppression.
 
-	    \item [3] At $T = 25\text{\degree{}C}$, non-repetitive.
-	\end{tablenotes}
+        \item [c] At $T = 25\text{\degree{}C}$, non-repetitive.
+    \end{tablenotes}
 \end{ZubaxTableWrapper}
 
 \subsection{Regenerative braking}
@@ -257,7 +257,7 @@ Additional connection options are available upon request.
 
 \subsection{CAN bus}
 
-The device is equipped with doubly redundant CAN 2.0A/B interface.
+The device is equipped with doubly redundant ISO 11898-2 CAN 2.0A/B interface.
 Each CAN interface has two standard UAVCAN Micro connectors\footnote{Refer to
 \url{http://uavcan.org} for more information on UAVCAN.}
 joined in parallel.
@@ -286,12 +286,12 @@ Connectors of the unused CAN bus interfaces should be left empty.
 		        & Negative-going input threshold voltage    & 500  & 600  &      & mV \\
 		        & Differential output voltage, dominant     & 1.5  & 2.0  & 3.0  & V \\
 		        & Differential output voltage, recessive    & -120 & 0    & 12   & mV \\
-		        & Bus power rail\tnote{1}\space{} voltage   & -10  &      & 10   & V \\
-		        & Inter-connector current\tnote{1}          & -1 &  & 1    & A \\
+		        & Bus power rail\tnote{a}\space{} voltage   & -10  &      & 10   & V \\
+		        & Inter-connector current\tnote{a}          & -1 &  & 1    & A \\
 		        & Connector resistance during device lifetime &    & 30   & 50   & $\text{m}\Omega$ \\
 	\end{ZubaxWrappedTable}
 	\begin{tablenotes}
-	    \item [1] The limit is imposed by the PCB.
+	    \item [a] The limit is imposed by the PCB.
 	\end{tablenotes}
 \end{ZubaxTableWrapper}
 
