@@ -8,5 +8,3 @@ Zubax Orel runs
 [PX4 Sapog - an advanced open source multiplatform BLDC motor controller firmware](https://github.com/PX4/sapog).
 
 Download the datasheet: <https://files.zubax.com/products/io.px4.sapog/Zubax_Orel_20_Datasheet.pdf>.
-
-This repository contains production testing software and models for 3D printing.
