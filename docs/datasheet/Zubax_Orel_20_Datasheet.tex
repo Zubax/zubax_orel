@@ -1,5 +1,5 @@
 %
-% Copyright (c) 2017  Zubax Robotics OU  <info@zubax.com>
+% Copyright (c) 2017-2018  Zubax Robotics  <info@zubax.com>
 %
 % Distributed under BY-NC-ND (attribution required, non-commercial use only, no derivatives).
 %
@@ -22,6 +22,9 @@ Zubax Orel 20 is an advanced sensorless BLDC propeller drive controller with dou
 Zubax Orel 20 runs the Sapog\footnote{Refer to the Sapog Reference Manual for information about the firmware.}
 firmware.
 
+A reduced version Zubax Orel 21 is available for cost-sensitive applications.
+Unlike Orel 20, it lacks the second CAN bus interface.
+
 \section*{Features}
 
 \begin{itemize}
@@ -35,7 +38,7 @@ firmware.
     high-\allowbreak{}frequency PWM.
     \item Supported interfaces:
     \begin{itemize}
-        \item CAN (ISO 11898-2), with optional dual redundancy.
+        \item CAN (ISO 11898-2), with optional dual redundancy. Orel 21 does not support redundant CAN bus.
         \item UART.
         \item RCPWM (analog PWM interface widely used in robotics).
     \end{itemize}
@@ -84,6 +87,8 @@ developed by Zubax Robotics.
 Please refer to the Sapog Reference Manual\footnote{Available from the Zubax Robotics website.}
 for its usage information.
 This datasheet is focused only on the hardware aspect of the product.
+
+A reduced model Orel 21 is available for cost-sensitive applications, which lacks the second CAN bus interface.
 
 \section{System integration}
 
@@ -222,7 +227,7 @@ Please contact Zubax Robotics for additional reliability and safety information.
     	    $\text{NiCd}$, $\text{NiMH}$ & 1.2           & \numrange{10}{12}\\
     	    $\text{Pb}$       & 2.0                      & \numrange{6}{8}\\
         \end{ZubaxCompactTable}
-        
+
         \item [b] Transient voltage suppression.
 
         \item [c] At $T = 25\text{\degree{}C}$, non-repetitive.
@@ -257,7 +262,7 @@ Additional connection options are available upon request.
 
 \subsection{CAN bus}
 
-The device is equipped with doubly redundant ISO 11898-2 CAN 2.0A/B interface.
+The device is equipped with a doubly redundant ISO 11898-2 CAN 2.0A/B interface.
 Each CAN interface has two standard UAVCAN Micro connectors\footnote{Refer to
 \url{http://uavcan.org} for more information on UAVCAN.}
 joined in parallel.
@@ -269,6 +274,9 @@ The device does not terminate the CAN bus internally.
 CAN2 (the secondary CAN bus interface) can only be used in configurations with redundant CAN bus.
 If the bus is not redundant, only CAN1 (the primary CAN bus interface) can be used.
 Connectors of the unused CAN bus interfaces should be left empty.
+
+The reduced model Zubax Orel 21 does not have the second CAN bus interface;
+only CAN1 (the primary CAN bus interface) is available there.
 
 \begin{ZubaxSimpleTable}{CAN bus connectors pinout}{|c X X X[3]|}
 	Pin no. & Type         & Name      & Comment \\
